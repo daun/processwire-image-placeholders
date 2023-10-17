@@ -1,6 +1,7 @@
 <?php namespace ProcessWire;
 
 use Daun\Placeholders\PlaceholderBlurHash;
+use Daun\Placeholders\PlaceholderThumbHash;
 
 // Register the private namespace used by this module
 wire('classLoader')->addNamespace('Daun', __DIR__ . '/lib');
@@ -33,7 +34,7 @@ class ImagePlaceholders extends WireData implements Module
 	{
 		$this->generators = [
 			// PlaceholderNone::class => $this->_('None'),
-			// PlaceholderThumbHash::class => $this->_('ThumbHash'),
+			PlaceholderThumbHash::class => $this->_('ThumbHash'),
 			PlaceholderBlurHash::class => $this->_('BlurHash'),
 			// PlaceholderAverageColor::class => $this->_('Average Color'),
 			// PlaceholderDominantColor::class => $this->_('Dominant Color'),

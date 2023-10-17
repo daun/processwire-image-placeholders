@@ -7,6 +7,7 @@ use ProcessWire\Pageimage;
 abstract class Placeholder {
 	public static string $name = '';
 	protected static string $fallback = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+	protected static int $thumbWidth = 200;
 
 	/**
 	 * Generate a placeholder string from a Pageimage object

@@ -2,6 +2,7 @@
 
 namespace Daun\Placeholders;
 
+use Daun\Image;
 use Daun\Placeholder;
 use kornrunner\Blurhash\Blurhash;
 use ProcessWire\Notice;
@@ -10,36 +11,59 @@ use ProcessWire\Pageimage;
 class PlaceholderBlurHash extends Placeholder {
 	public static string $name = 'blurhash';
 
+	protected static int $maxThumbWidth = 100;
 	protected static int $compX = 4;
 	protected static int $compY = 3;
-	protected static int $thumbWidth = 200;
-
 
 	public static function generatePlaceholder(Pageimage $image): string {
-		$blurhash = '';
+		$contents = Image::readImageContents($image->filename);
+		$pixels = static::generatePixelMatrixFromImage($contents);
+		if (!$pixels) return '';
 
-		$path = $image->filename;
-		if (!file_exists($path) || is_dir($path) || !exif_imagetype($path)) {
-			// $this->errors("Image file does not exist", Notice::log);
-			return $blurhash;
+		try {
+			return Blurhash::encode($pixels, static::$compX, static::$compY);
+		} catch (\Exception $e) {
+			// $this->errors("Error encoding blurhash: {$e->getMessage()}", Notice::log);
+			return '';
+		}
+	}
+
+	public static function generateDataURI(string $hash, int $width = 0, int $height = 0): string {
+		if (!$hash || $width <= 0 || $height <= 0) {
+			return '';
 		}
 
-		$contents = file_get_contents($path);
-		if (!$contents || empty($contents)) {
-			// $this->errors("Image file is empty", Notice::log);
-			return $blurhash;
+		$ratio =  $width / $height;
+		$thumbWidth = floor(min(static::$maxThumbWidth, $width));
+		$thumbHeight = floor($thumbWidth / $ratio);
+
+		try {
+			$pixels = Blurhash::decode($hash, $thumbWidth, $thumbHeight);
+		} catch (\Exception $e) {
+			// $this->errors("Error decoding blurhash: {$e->getMessage()}", Notice::log);
+			$pixels = [];
+		}
+
+		$image = static::generateImageFromPixelMatrix($pixels, $thumbWidth, $thumbHeight);
+		$data = base64_encode($image);
+		return "data:image/png;base64,{$data}";
+	}
+
+	protected static function generatePixelMatrixFromImage(string $contents): array {
+		if (!$contents) {
+			return [];
 		}
 
 		$image = imagecreatefromstring($contents);
-		$thumbWidth = min(static::$thumbWidth, imagesx($image));
+		$thumbWidth = min(static::$maxThumbWidth, imagesx($image));
 		$image = imagescale($image, $thumbWidth, -1);
 		$width = imagesx($image);
 		$height = imagesy($image);
 
 		$pixels = [];
-		for ($y = 0; $y < $height; ++$y) {
+		for ($y = 0; $y < $height; $y++) {
 			$row = [];
-			for ($x = 0; $x < $width; ++$x) {
+			for ($x = 0; $x < $width; $x++) {
 				$index = imagecolorat($image, $x, $y);
 				$colors = imagecolorsforindex($image, $index);
 				$r = max(0, min(255, $colors['red']));
@@ -49,38 +73,18 @@ class PlaceholderBlurHash extends Placeholder {
 			}
 			$pixels[] = $row;
 		}
-		try {
-			$blurhash = Blurhash::encode($pixels, static::$compX, static::$compY);
-		} catch (\Exception $e) {
-			// $this->errors("Error encoding blurhash: {$e->getMessage()}", Notice::log);
-			return $blurhash;
-		}
 
-		return $blurhash;
+		return [$width, $height, $pixels];
 	}
 
-	public static function generateDataURI(string $hash, int $width = 0, int $height = 0): string {
-		if (!$hash || $width <= 0 || $height <= 0) {
+	protected static function generateImageFromPixelMatrix(array $pixels, int $width, int $height): string {
+		if (!$pixels || !count($pixels)) {
 			return '';
 		}
 
-		$ratio =  $width / $height;
-		$thumbWidth = floor(min(static::$thumbWidth, $width));
-		$thumbHeight = floor($thumbWidth / $ratio);
-
-		try {
-			$pixels = Blurhash::decode($hash, $thumbWidth, $thumbHeight);
-		} catch (\Exception $e) {
-			// $this->errors("Error decoding blurhash: {$e->getMessage()}", Notice::log);
-		}
-
-		if (!$pixels) {
-			return '';
-		}
-
-		$image = imagecreatetruecolor($thumbWidth, $thumbHeight);
-		for ($y = 0; $y < $thumbHeight; ++$y) {
-			for ($x = 0; $x < $thumbWidth; ++$x) {
+		$image = imagecreatetruecolor($width, $height);
+		for ($y = 0; $y < $width; ++$y) {
+			for ($x = 0; $x < $height; ++$x) {
 				[$r, $g, $b] = $pixels[$y][$x];
 				$r = max(0, min(255, $r));
 				$g = max(0, min(255, $g));
@@ -98,7 +102,6 @@ class PlaceholderBlurHash extends Placeholder {
 		ob_end_clean();
 		imagedestroy($image);
 
-		$data = base64_encode($contents);
-		return "data:image/png;base64,{$data}";
+		return $contents;
 	}
 }

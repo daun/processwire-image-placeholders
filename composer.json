@@ -17,11 +17,11 @@
     ],
     "require": {
         "php": ">=7.0",
-        "composer/installers": "~1.0",
-        "kornrunner/blurhash": "~1.2.1",
         "ext-curl": "*",
         "ext-gd": "*",
         "ext-exif": "*",
+        "composer/installers": "~1.0",
+        "kornrunner/blurhash": "~1.2.1",
         "srwiez/thumbhash": "^1.2"
     },
     "config": {
