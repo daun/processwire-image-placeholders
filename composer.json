@@ -4,7 +4,7 @@
     "extra": {
         "installer-name": "ImagePlaceholders"
     },
-    "description": "Generate low-quality image placeholders (LQIP) on upload.",
+    "description": "A ProcessWire module to generate low-quality image placeholders (LQIP) for smoother lazyloading",
     "keywords": [ "processwire", "image", "placeholder", "lqip", "thumbhash", "blurhash", "lazyload" ],
     "homepage": "https://github.com/daun/processwire-image-placeholders",
     "license": "MIT",
