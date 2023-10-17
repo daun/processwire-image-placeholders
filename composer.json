@@ -1,0 +1,32 @@
+{
+    "name": "daun/processwire-image-placeholders",
+    "type": "processwire-module",
+    "extra": {
+        "installer-name": "ImagePlaceholders"
+    },
+    "description": "Generate low-quality image placeholders (LQIP) on upload.",
+    "keywords": [ "processwire", "image", "placeholder", "lqip", "thumbhash", "blurhash", "lazyload" ],
+    "homepage": "https://github.com/daun/processwire-image-placeholders",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Philipp Daun",
+            "email": "post@philippdaun.net",
+            "homepage": "https://philippdaun.net"
+        }
+    ],
+    "require": {
+        "php": ">=7.0",
+        "composer/installers": "~1.0",
+        "kornrunner/blurhash": "~1.2.1",
+        "ext-curl": "*",
+        "ext-gd": "*",
+        "ext-exif": "*",
+        "srwiez/thumbhash": "^1.2"
+    },
+    "config": {
+        "allow-plugins": {
+            "composer/installers": true
+        }
+    }
+}
