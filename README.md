@@ -2,6 +2,8 @@
 
 A ProcessWire module to generate image placeholders for smoother lazyloading.
 
+Supports [ThumbHash](https://evanw.github.io/thumbhash/) and [BlurHash](https://blurha.sh/) placeholders.
+
 ## Why use image placeholders?
 
 Low-Quality Image Placeholders (LQIP) are used to improve the perceived performance of sites by
@@ -16,12 +18,11 @@ a data URI string to display while the high-quality image is loading. See below 
 
 ## Placeholder types
 
-Currently, the module supports generating three types of image placeholders. The default is
+Currently, the module supports generating two types of image placeholders. The default is
 `ThumbHash`.
 
 - [BlurHash](https://blurha.sh/): the original format developed by Wolt
 - [ThumbHash](https://evanw.github.io/thumbhash/): a newer format with better color rendering and alpha channel support
-- ProcessWire: generate a tiny variation of the image and cache it
 
 ## Installation
 
