@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2
+
+- Check for supported file formats
+- Regenerate placeholder when replacing single image
+
 ## 0.1.1
 
 - Allow generating missing placeholders for existing images
