@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b780b5584a55e8914ddb6ed0c3a4de4a",
+    "content-hash": "0e8ad62351f8deff881fe2becd991f56",
     "packages": [
         {
             "name": "composer/installers",
-            "version": "v1.11.0",
+            "version": "v1.12.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/installers.git",
-                "reference": "ae03311f45dfe194412081526be2e003960df74b"
+                "reference": "d20a64ed3c94748397ff5973488761b22f6d3f19"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/installers/zipball/ae03311f45dfe194412081526be2e003960df74b",
-                "reference": "ae03311f45dfe194412081526be2e003960df74b",
+                "url": "https://api.github.com/repos/composer/installers/zipball/d20a64ed3c94748397ff5973488761b22f6d3f19",
+                "reference": "d20a64ed3c94748397ff5973488761b22f6d3f19",
                 "shasum": ""
             },
             "require": {
@@ -116,6 +116,7 @@
                 "modx",
                 "moodle",
                 "osclass",
+                "pantheon",
                 "phpbb",
                 "piwik",
                 "ppi",
@@ -138,7 +139,7 @@
             ],
             "support": {
                 "issues": "https://github.com/composer/installers/issues",
-                "source": "https://github.com/composer/installers/tree/v1.11.0"
+                "source": "https://github.com/composer/installers/tree/v1.12.0"
             },
             "funding": [
                 {
@@ -154,26 +155,27 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-04-28T06:42:17+00:00"
+            "time": "2021-09-13T08:19:44+00:00"
         },
         {
             "name": "kornrunner/blurhash",
-            "version": "v1.2.1",
+            "version": "v1.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/kornrunner/php-blurhash.git",
-                "reference": "7dde9c0c7ee7e688dc79fb7770ee110ed308ffc7"
+                "reference": "bc8a4596cb0a49874f0158696a382ab3933fefe4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kornrunner/php-blurhash/zipball/7dde9c0c7ee7e688dc79fb7770ee110ed308ffc7",
-                "reference": "7dde9c0c7ee7e688dc79fb7770ee110ed308ffc7",
+                "url": "https://api.github.com/repos/kornrunner/php-blurhash/zipball/bc8a4596cb0a49874f0158696a382ab3933fefe4",
+                "reference": "bc8a4596cb0a49874f0158696a382ab3933fefe4",
                 "shasum": ""
             },
             "require": {
                 "php": "^7.3|^8.0"
             },
             "require-dev": {
+                "ext-gd": "*",
                 "ocramius/package-versions": "^1.4|^2.0",
                 "phpstan/phpstan": "^0.12",
                 "phpunit/phpunit": "^9",
@@ -201,7 +203,7 @@
                 "issues": "https://github.com/kornrunner/php-blurhash/issues",
                 "source": "https://github.com/kornrunner/php-blurhash.git"
             },
-            "time": "2021-01-18T11:17:12+00:00"
+            "time": "2022-07-13T19:38:39+00:00"
         },
         {
             "name": "srwiez/thumbhash",
