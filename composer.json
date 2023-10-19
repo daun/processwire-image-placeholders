@@ -17,7 +17,6 @@
     ],
     "require": {
         "php": ">=7.0",
-        "ext-curl": "*",
         "ext-gd": "*",
         "ext-exif": "*",
         "composer/installers": "~1.0",
