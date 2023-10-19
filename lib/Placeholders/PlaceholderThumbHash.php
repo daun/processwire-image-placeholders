@@ -21,7 +21,6 @@ class PlaceholderThumbHash extends Placeholder {
 			return Thumbhash::convertHashToString($hash);
 		} catch (\Exception $e) {
 			throw new \Exception("Error encoding thumbhash: {$e->getMessage()}");
-			return '';
 		}
 	}
 
@@ -35,7 +34,6 @@ class PlaceholderThumbHash extends Placeholder {
 			return Thumbhash::toDataURL($hash);
 		} catch (\Exception $e) {
 			throw new \Exception("Error decoding thumbhash: {$e->getMessage()}");
-			return static::$fallback;
 		}
 	}
 
@@ -48,7 +46,7 @@ class PlaceholderThumbHash extends Placeholder {
 	}
 
 	protected static function generatePixelMatrixFromImageUsingGD(string $contents): array {
-		$image = imagecreatefromstring($contents);
+		$image = @imagecreatefromstring($contents);
 		[$width, $height] = Image::contain(imagesx($image), imagesy($image), static::$maxThumbSize);
 		$image = imagescale($image, $width, $height);
 

@@ -10,7 +10,7 @@ Low-Quality Image Placeholders (LQIP) are used to improve the perceived performa
 displaying a small, low-quality version of an image while the high-quality version is being loaded.
 The LQIP technique is often used in combination with lazy loading.
 
-## How does it work
+## How it works
 
 This module will automatically generate an image placeholder for each image that is uploaded to
 fields configured to use them. In your frontend templates, you can access the image placeholder as
@@ -21,8 +21,15 @@ a data URI string to display while the high-quality image is loading. See below 
 Currently, the module supports generating two types of image placeholders. The default is
 `ThumbHash`.
 
-- [BlurHash](https://blurha.sh/): the original format developed by Wolt
-- [ThumbHash](https://evanw.github.io/thumbhash/): a newer format with better color rendering and alpha channel support
+### BlurHash
+
+[BlurHash](https://blurha.sh/) is the original placeholder algorithm, developed at Wolt. It
+currently has no support for alpha channels and will render transparency in black.
+
+### ThumbHash
+
+[ThumbHash](https://evanw.github.io/thumbhash/) is a newer algorith with improved color rendering
+and support for transparency.
 
 ## Installation
 
@@ -39,6 +46,9 @@ Open the admin panel of your site and navigate to `Modules` → `Site` → `Imag
 You'll need to configure your image fields to generate image placeholders.
 
 `Setup` → `Fields` → `[images]` → `Details` → `Image placeholders`
+
+There, you can choose the type of placeholder to generate. If you're installing the module on an
+existing site, you can also choose to batch-generate placeholders for any existing images.
 
 ## Usage
 
