@@ -15,6 +15,7 @@ class PlaceholderThumbHash extends Placeholder {
 	public static function generatePlaceholder(Pageimage $image): string {
 		try {
 			$contents = Image::readImageContents($image->filename);
+			if (!$contents) return '';
 			[$width, $height, $pixels] = static::generatePixelMatrixFromImage($contents);
 			$hash = Thumbhash::RGBAToHash($width, $height, $pixels);
 			return Thumbhash::convertHashToString($hash);
@@ -38,7 +39,7 @@ class PlaceholderThumbHash extends Placeholder {
 		}
 	}
 
-	protected static function generatePixelMatrixFromImage(string $contents): array {
+	protected static function generatePixelMatrixFromImage(?string $contents): array {
 		if (!$contents) {
 			return [];
 		}
