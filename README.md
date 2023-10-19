@@ -18,18 +18,21 @@ a data URI string to display while the high-quality image is loading. See below 
 
 ## Placeholder types
 
-Currently, the module supports generating two types of image placeholders. The default is
-`ThumbHash`.
+The module supports generating various types of image placeholders. The default is `ThumbHash`.
+
+### ThumbHash
+
+[ThumbHash](https://evanw.github.io/thumbhash/) is a newer algorith with improved color rendering
+and support for transparency.
 
 ### BlurHash
 
 [BlurHash](https://blurha.sh/) is the original placeholder algorithm, developed at Wolt. It
 currently has no support for alpha channels and will render transparency in black.
 
-### ThumbHash
+### Average color
 
-[ThumbHash](https://evanw.github.io/thumbhash/) is a newer algorith with improved color rendering
-and support for transparency.
+Calculates the average color of the image.
 
 ## Installation
 
