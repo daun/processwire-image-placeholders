@@ -202,6 +202,7 @@ class ImagePlaceholders extends WireData implements Module
 		$fs->name = '_files_fieldset_placeholders';
 		$fs->label = $this->_('Image placeholders');
 		$fs->icon = 'picture-o';
+		$fs->addClass('InputfieldIsOffset');
 		// $inputfields->insertAfter($fs, $children->first());
 		$inputfields->add($fs);
 
