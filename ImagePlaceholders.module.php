@@ -55,8 +55,8 @@ class ImagePlaceholders extends WireData implements Module
 
 		// Add `Pageimage.lqip($width, $height)` method that returns the placeholder in a given size
 		$this->addHookMethod('Pageimage::lqip', function (HookEvent $event) {
-			$width = $event->arguments(0) ?: null;
-			$height = $event->arguments(1) ?: null;
+			$width = (int) $event->arguments(0) ?: 0;
+			$height = (int) $event->arguments(1) ?: 0;
 			$event->return = $this->getPlaceholderDataUri($event->object, $width, $height);
 		});
 	}
