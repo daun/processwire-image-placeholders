@@ -46,7 +46,7 @@ class PlaceholderThumbHash extends Placeholder {
 	}
 
 	protected static function generatePixelMatrixFromImageUsingGD(string $contents): array {
-		$image = imagecreatefromstring($contents);
+		$image = @imagecreatefromstring($contents);
 		[$width, $height] = Image::contain(imagesx($image), imagesy($image), static::$maxThumbSize);
 		$image = imagescale($image, $width, $height);
 
