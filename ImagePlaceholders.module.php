@@ -119,6 +119,17 @@ class ImagePlaceholders extends WireData implements Module
 		$image->page->save($image->field->name, ["quiet" => true, "noHooks" => true]);
 	}
 
+	protected function clearPlaceholder(Pageimage $image): bool
+	{
+		$before = $image->filedata("image-placeholder-data");
+		$image->filedata(false, "image-placeholder-type");
+		$image->filedata(false, "image-placeholder-data");
+		$image->filedata(false, "image-placeholder-created");
+		$after = $image->filedata("image-placeholder-data");
+		$image->page->save($image->field->name, ["quiet" => true, "noHooks" => true]);
+		return $before !== $after;
+	}
+
 	protected function generatePlaceholder(Pageimage $image): array
 	{
 		try {
@@ -189,6 +200,24 @@ class ImagePlaceholders extends WireData implements Module
 		$this->message(sprintf($this->_('Generated %d placeholders of %d images in field `%s`'), $generated, $total, $field->name));
 	}
 
+	protected function removePlaceholdersForField(Field $field, bool $force = false): void
+	{
+		$total = 0;
+		$removed = 0;
+		$pages = $this->wire()->pages->findMany("{$field->name}.count>0, check_access=0");
+		foreach ($pages as $page) {
+			$images = $page->getUnformatted($field->name);
+			foreach ($images as $image) {
+				$total++;
+				if ($this->clearPlaceholder($image, $force)) {
+					$removed++;
+				}
+			}
+		}
+
+		$this->message(sprintf($this->_('Removed %d placeholders of %d images in field `%s`'), $removed, $total, $field->name));
+	}
+
 	protected function addImageFieldSettings(HookEvent $event)
 	{
 		$modules = $this->wire()->modules;
@@ -236,17 +265,30 @@ class ImagePlaceholders extends WireData implements Module
 		$f->checked = false;
 		$fs->add($f);
 
-		// Re-generate all placeholders for existing images
+		// Recreate all placeholders for existing images
 		/** @var InputfieldCheckbox $f */
 		$f = $modules->get('InputfieldCheckbox');
-		$f->name = 'imagePlaceholdersRegenerateAll';
-		$f->label = $this->_('Re-generate all placeholders');
+		$f->name = 'imagePlaceholdersGenerateAll';
+		$f->label = $this->_('Recreate all placeholders');
 		$f->description = $this->_('Check the box below and submit the form to re-generate all placeholders for any existing images in this field. Useful after changing the placeholder type.');
-		$f->label2 = $this->_('Re-generate all placeholders for existing images');
+		$f->label2 = $this->_('Recreate all placeholders for existing images');
 		$f->collapsed = true;
 		// $f->showIf = 'imagePlaceholdersGenerateMissing=1';
 		$f->showIf = 'imagePlaceholderType!=""';
 		$f->icon = 'refresh';
+		$f->value = 1;
+		$f->checked = false;
+		$fs->add($f);
+
+		// Remove all placeholders for existing images
+		/** @var InputfieldCheckbox $f */
+		$f = $modules->get('InputfieldCheckbox');
+		$f->name = 'imagePlaceholdersRemoveAll';
+		$f->label = $this->_('Remove all placeholders');
+		$f->description = $this->_('Check the box below and submit the form to remove any generated placeholders for images in this field. Useful to clean up database space before uninstalling this module.');
+		$f->label2 = $this->_('Remove all placeholders for existing images');
+		$f->collapsed = true;
+		$f->icon = 'trash-o';
 		$f->value = 1;
 		$f->checked = false;
 		$fs->add($f);
@@ -259,10 +301,12 @@ class ImagePlaceholders extends WireData implements Module
 		/** @var FieldtypeImage $fieldtype */
 		$field = $event->arguments(0);
 
-		if ($field->imagePlaceholdersRegenerateAll) {
+		if ($field->imagePlaceholdersGenerateAll) {
 			$this->createPlaceholdersForField($field, true);
 		} else if ($field->imagePlaceholdersGenerateMissing) {
 			$this->createPlaceholdersForField($field, false);
+		} else if ($field->imagePlaceholdersRemoveAll) {
+			$this->removePlaceholdersForField($field);
 		}
 	}
 
