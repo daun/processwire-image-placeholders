@@ -3,8 +3,9 @@
 namespace Daun;
 
 use ProcessWire\Pageimage;
+use ProcessWire\Wire;
 
-abstract class Placeholder {
+abstract class Placeholder extends Wire {
 	public static string $name = '';
 	protected static string $fallback = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
 
