@@ -43,21 +43,21 @@ class ImagePlaceholders extends WireData implements Module
 			// PlaceholderSVG::class => $this->_('SVG'),
 		];
 
-		// On image upload, generate placeholder
-		$this->addHookAfter('FieldtypeImage::savePageField', $this, 'handleImageUpload');
-
 		// Add settings to image field config screen
 		$this->addHookAfter('FieldtypeImage::getConfigInputfields', $this, 'addImageFieldSettings');
 
-		// Generate palceholders for existing images on field save
+		// Generate placeholders for existing images on field save
 		$this->addHookAfter('FieldtypeImage::savedField', $this, 'handleImageFieldtypeSave');
 
-		// Add `Pageimage.lqip` property that returns the placeholder data uri
+		// Generate placeholder on image upload
+		$this->addHookAfter('FieldtypeImage::savePageField', $this, 'handleImageUpload');
+
+		// Add `$image->lqip` property that returns the placeholder data uri
 		$this->addHookProperty('Pageimage::lqip', function (HookEvent $event) {
 			$event->return = $this->getPlaceholderDataUri($event->object);
 		});
 
-		// Add `Pageimage.lqip($width, $height)` method that returns the placeholder in a given size
+		// Add `$image->lqip($width, $height)` method that returns the placeholder in a given size
 		$this->addHookMethod('Pageimage::lqip', function (HookEvent $event) {
 			$width = (int) $event->arguments(0) ?: 0;
 			$height = (int) $event->arguments(1) ?: 0;
@@ -94,7 +94,7 @@ class ImagePlaceholders extends WireData implements Module
 
 	protected function getPlaceholderType(Field $field): string
 	{
-		return $field->generateLqip ?? '';
+		return $field->imagePlaceholderType ?: '';
 	}
 
 	protected function getPlaceholder(Pageimage $image, bool $checks = false): array
@@ -102,8 +102,10 @@ class ImagePlaceholders extends WireData implements Module
 		$type = $image->filedata("image-placeholder-type");
 		$data = $image->filedata("image-placeholder-data");
 		if ($checks) {
-			$expectedType = $this->getPlaceholderType($image->field);
-			if ($type !== $expectedType) {
+			$created = $image->filedata("image-placeholder-created");
+			$current = $created && $image->modified <= $created;
+			$expected = $this->getPlaceholderType($image->field);
+			if (!$current || $type !== $expected) {
 				$data = null;
 			}
 		}
@@ -115,17 +117,17 @@ class ImagePlaceholders extends WireData implements Module
 		[$type, $data] = $placeholder;
 		$image->filedata("image-placeholder-type", $type);
 		$image->filedata("image-placeholder-data", $data);
+		$image->filedata("image-placeholder-created", time());
 		$image->page->save($image->field->name, ["quiet" => true, "noHooks" => true]);
 	}
 
 	protected function generatePlaceholder(Pageimage $image): array
 	{
-		$type = $this->getPlaceholderType($image->field);
-		$handler = $this->getPlaceholderGenerator($type);
-		$placeholder = '';
-
 		try {
+			$type = $this->getPlaceholderType($image->field);
+			$handler = $this->getPlaceholderGenerator($type);
 			$placeholder = $handler::generatePlaceholder($image);
+			return [$type, $placeholder];
 		} catch (\Throwable $e) {
 			if ($this->wire()->user->isSuperuser()) {
 				$this->wire()->error("Error generating image placeholder: {$e->getMessage()}");
@@ -133,15 +135,13 @@ class ImagePlaceholders extends WireData implements Module
 			$this->wire()->log("Error generating image placeholder: {$e->getMessage()}: {$e->getTraceAsString()}");
 		}
 
-		return [$type, $placeholder];
+		return [null, null];
 	}
 
 	protected function getPlaceholderDataUri(Pageimage $image, int $width = 0, int $height = 0): string
 	{
 		[$type, $placeholder] = $this->getPlaceholder($image, false);
-		if (!$placeholder) {
-			return '';
-		}
+		if (!$placeholder) return '';
 
 		$handler = $this->getPlaceholderGenerator($type);
 		$width = $width ?: $this->defaultLqipWidth;
@@ -175,20 +175,20 @@ class ImagePlaceholders extends WireData implements Module
 			$this->message(sprintf($this->_('Generating missing image placeholders in field `%s`'), $field->name));
 		}
 
-		$count = 0;
 		$total = 0;
+		$generated = 0;
 		$pages = $this->wire()->pages->findMany("{$field->name}.count>0, check_access=0");
 		foreach ($pages as $page) {
 			$images = $page->getUnformatted($field->name);
-			$total += $images->count();
 			foreach ($images as $image) {
+				$total++;
 				if ($this->generateAndSavePlaceholder($image, $force)) {
-					$count++;
+					$generated++;
 				}
 			}
 		}
 
-		$this->message(sprintf($this->_('Generated %d placeholders of %d images in field `%s`'), $count, $total, $field->name));
+		$this->message(sprintf($this->_('Generated %d placeholders of %d images in field `%s`'), $generated, $total, $field->name));
 	}
 
 	protected function addImageFieldSettings(HookEvent $event)
@@ -211,7 +211,7 @@ class ImagePlaceholders extends WireData implements Module
 		// Placeholder type
 		/** @var InputfieldRadios $f */
 		$f = $modules->get('InputfieldRadios');
-		$f->name = 'generateLqip';
+		$f->name = 'imagePlaceholderType';
 		$f->label = $this->_('Placeholder type');
 		$f->description = $this->_('Choose whether this field should generate low-quality image placeholders (LQIP) on upload.');
 		$f->icon = 'toggle-on';
@@ -220,19 +220,19 @@ class ImagePlaceholders extends WireData implements Module
 		foreach ($this->generators as $class => $label) {
 			$f->addOption($class::$name, $label);
 		}
-		$f->value = $field->generateLqip;
+		$f->value = $field->imagePlaceholderType;
 		$fs->add($f);
 
 		// Generate missing placeholders for existing images
 		/** @var InputfieldCheckbox $f */
 		$f = $modules->get('InputfieldCheckbox');
-		$f->name = 'generateLqipForExisting';
+		$f->name = 'imagePlaceholdersGenerateMissing';
 		$f->label = $this->_('Generate missing placeholders');
 		$f->description = $this->_('Placeholders are only generated when uploading new images.') . ' '
 			. $this->_('Check the box below and submit the form to batch-generate image placeholders for any existing images in this field.');
 		$f->label2 = $this->_('Generate missing placeholders for existing images');
 		$f->collapsed = true;
-		$f->showIf = 'generateLqip!=""';
+		$f->showIf = 'imagePlaceholderType!=""';
 		$f->icon = 'question-circle-o';
 		$f->value = 1;
 		$f->checked = false;
@@ -241,19 +241,19 @@ class ImagePlaceholders extends WireData implements Module
 		// Re-generate all placeholders for existing images
 		/** @var InputfieldCheckbox $f */
 		$f = $modules->get('InputfieldCheckbox');
-		$f->name = 'generateLqipForAll';
+		$f->name = 'imagePlaceholdersRegenerateAll';
 		$f->label = $this->_('Re-generate all placeholders');
 		$f->description = $this->_('Check the box below and submit the form to re-generate all placeholders for any existing images in this field. Useful after changing the placeholder type.');
 		$f->label2 = $this->_('Re-generate all placeholders for existing images');
 		$f->collapsed = true;
-		// $f->showIf = 'generateLqipForExisting=1';
-		$f->showIf = 'generateLqip!=""';
+		// $f->showIf = 'imagePlaceholdersGenerateMissing=1';
+		$f->showIf = 'imagePlaceholderType!=""';
 		$f->icon = 'refresh';
 		$f->value = 1;
 		$f->checked = false;
 		$fs->add($f);
 
-		// generateLqipForExisting
+		// imagePlaceholdersGenerateMissing
 	}
 
 	protected function handleImageFieldtypeSave(HookEvent $event)
@@ -261,9 +261,9 @@ class ImagePlaceholders extends WireData implements Module
 		/** @var FieldtypeImage $fieldtype */
 		$field = $event->arguments(0);
 
-		if ($field->generateLqipForAll) {
+		if ($field->imagePlaceholdersRegenerateAll) {
 			$this->createPlaceholdersForField($field, true);
-		} else if ($field->generateLqipForExisting) {
+		} else if ($field->imagePlaceholdersGenerateMissing) {
 			$this->createPlaceholdersForField($field, false);
 		}
 	}
