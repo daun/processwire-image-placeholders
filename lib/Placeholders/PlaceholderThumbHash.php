@@ -21,7 +21,6 @@ class PlaceholderThumbHash extends Placeholder {
 			return Thumbhash::convertHashToString($hash);
 		} catch (\Exception $e) {
 			throw new \Exception("Error encoding thumbhash: {$e->getMessage()}");
-			return '';
 		}
 	}
 
@@ -35,7 +34,6 @@ class PlaceholderThumbHash extends Placeholder {
 			return Thumbhash::toDataURL($hash);
 		} catch (\Exception $e) {
 			throw new \Exception("Error decoding thumbhash: {$e->getMessage()}");
-			return static::$fallback;
 		}
 	}
 

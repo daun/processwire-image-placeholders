@@ -25,7 +25,6 @@ class PlaceholderBlurHash extends Placeholder {
 			return Blurhash::encode($pixels, static::$compX, static::$compY);
 		} catch (\Exception $e) {
 			throw new \Exception("Error encoding blurhash: {$e->getMessage()}");
-			return '';
 		}
 	}
 
@@ -40,7 +39,6 @@ class PlaceholderBlurHash extends Placeholder {
 			$pixels = Blurhash::decode($hash, $calcWidth, $calcHeight);
 		} catch (\Exception $e) {
 			throw new \Exception("Error decoding blurhash: {$e->getMessage()}");
-			$pixels = [];
 		}
 
 		$image = static::generateImageFromPixelMatrix($pixels, $width, $height);
