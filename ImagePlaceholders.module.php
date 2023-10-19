@@ -1,5 +1,6 @@
 <?php namespace ProcessWire;
 
+use Daun\Placeholders\PlaceholderAverageColor;
 use Daun\Placeholders\PlaceholderBlurHash;
 use Daun\Placeholders\PlaceholderThumbHash;
 
@@ -36,7 +37,7 @@ class ImagePlaceholders extends WireData implements Module
 			// PlaceholderNone::class => $this->_('None'),
 			PlaceholderThumbHash::class => $this->_('ThumbHash'),
 			PlaceholderBlurHash::class => $this->_('BlurHash'),
-			// PlaceholderAverageColor::class => $this->_('Average Color'),
+			PlaceholderAverageColor::class => $this->_('Average Color'),
 			// PlaceholderDominantColor::class => $this->_('Dominant Color'),
 			// PlaceholderProcessWire::class => $this->_('Image variant'),
 			// PlaceholderSVG::class => $this->_('SVG'),
