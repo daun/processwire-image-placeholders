@@ -44,12 +44,15 @@ class ImagePlaceholders extends WireData implements Module
 
 		// On image upload, generate placeholder
 		$this->addHookAfter('FieldtypeImage::savePageField', $this, 'handleImageFieldSave');
+
 		// Add settings to image field config screen
 		$this->addHookAfter('FieldtypeImage::getConfigInputfields', $this, 'addImageFieldSettings');
+
 		// Add `Pageimage.lqip` property that returns the placeholder data uri
 		$this->addHookProperty('Pageimage::lqip', function (HookEvent $event) {
 			$event->return = $this->getPlaceholderDataUri($event->object);
 		});
+
 		// Add `Pageimage.lqip($width, $height)` method that returns the placeholder in a given size
 		$this->addHookMethod('Pageimage::lqip', function (HookEvent $event) {
 			$width = $event->arguments(0) ?: null;
@@ -114,13 +117,16 @@ class ImagePlaceholders extends WireData implements Module
 		try {
 			$placeholder = $handler::generatePlaceholder($image);
 		} catch (\Throwable $e) {
-			$this->wire()->error($e->getMessage());
+			if ($this->wire()->user->isSuperuser()) {
+				$this->wire()->error("Error generating image placeholder: {$e->getMessage()}");
+			}
+			$this->wire()->log("Error generating image placeholder: {$e->getMessage()}: {$e->getTraceAsString()}");
 		}
 
 		return [$type, $placeholder];
 	}
 
-	protected function getPlaceholderDataUri(Pageimage $image, ?int $width = null, ?int $height = null): string
+	protected function getPlaceholderDataUri(Pageimage $image, int $width = 0, int $height = 0): string
 	{
 		[$type, $placeholder] = $this->getPlaceholder($image, false);
 		if (!$placeholder) {

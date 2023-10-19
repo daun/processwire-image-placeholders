@@ -10,41 +10,39 @@ use ProcessWire\Pageimage;
 
 class PlaceholderBlurHash extends Placeholder {
 	public static string $name = 'blurhash';
-
-	protected static int $maxThumbWidth = 100;
 	protected static int $compX = 4;
 	protected static int $compY = 3;
+	protected static int $maxInputSize = 200;
+	protected static int $calcSize = 200;
 
 	public static function generatePlaceholder(Pageimage $image): string {
 		$contents = Image::readImageContents($image->filename);
 		$pixels = static::generatePixelMatrixFromImage($contents);
-		if (!$pixels) return '';
+		if (!count($pixels)) return '';
 
 		try {
 			return Blurhash::encode($pixels, static::$compX, static::$compY);
 		} catch (\Exception $e) {
-			// $this->errors("Error encoding blurhash: {$e->getMessage()}", Notice::log);
+			throw new \Exception("Error encoding blurhash: {$e->getMessage()}");
 			return '';
 		}
 	}
 
 	public static function generateDataURI(string $hash, int $width = 0, int $height = 0): string {
 		if (!$hash || $width <= 0 || $height <= 0) {
-			return '';
+			return static::$fallback;
 		}
 
-		$ratio =  $width / $height;
-		$thumbWidth = floor(min(static::$maxThumbWidth, $width));
-		$thumbHeight = floor($thumbWidth / $ratio);
+		[$calcWidth, $calcHeight] = Image::contain($width, $height, static::$calcSize);
 
 		try {
-			$pixels = Blurhash::decode($hash, $thumbWidth, $thumbHeight);
+			$pixels = Blurhash::decode($hash, $calcWidth, $calcHeight);
 		} catch (\Exception $e) {
-			// $this->errors("Error decoding blurhash: {$e->getMessage()}", Notice::log);
+			throw new \Exception("Error decoding blurhash: {$e->getMessage()}");
 			$pixels = [];
 		}
 
-		$image = static::generateImageFromPixelMatrix($pixels, $thumbWidth, $thumbHeight);
+		$image = static::generateImageFromPixelMatrix($pixels, $width, $height);
 		$data = base64_encode($image);
 		return "data:image/png;base64,{$data}";
 	}
@@ -55,10 +53,8 @@ class PlaceholderBlurHash extends Placeholder {
 		}
 
 		$image = imagecreatefromstring($contents);
-		$thumbWidth = min(static::$maxThumbWidth, imagesx($image));
-		$image = imagescale($image, $thumbWidth, -1);
-		$width = imagesx($image);
-		$height = imagesy($image);
+		[$width, $height] = Image::contain(imagesx($image), imagesy($image), static::$maxInputSize);
+		$image = imagescale($image, $width, $height);
 
 		$pixels = [];
 		for ($y = 0; $y < $height; $y++) {
@@ -74,7 +70,7 @@ class PlaceholderBlurHash extends Placeholder {
 			$pixels[] = $row;
 		}
 
-		return [$width, $height, $pixels];
+		return $pixels;
 	}
 
 	protected static function generateImageFromPixelMatrix(array $pixels, int $width, int $height): string {
@@ -82,9 +78,10 @@ class PlaceholderBlurHash extends Placeholder {
 			return '';
 		}
 
-		$image = imagecreatetruecolor($width, $height);
-		for ($y = 0; $y < $width; ++$y) {
-			for ($x = 0; $x < $height; ++$x) {
+		[$calcWidth, $calcHeight] = Image::contain($width, $height, static::$calcSize);
+		$image = imagecreatetruecolor($calcWidth, $calcHeight);
+		for ($y = 0; $y < $calcHeight; $y++) {
+			for ($x = 0; $x < $calcWidth; $x++) {
 				[$r, $g, $b] = $pixels[$y][$x];
 				$r = max(0, min(255, $r));
 				$g = max(0, min(255, $g));
