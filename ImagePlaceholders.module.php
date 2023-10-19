@@ -34,7 +34,6 @@ class ImagePlaceholders extends WireData implements Module
 	public function init()
 	{
 		$this->generators = [
-			// PlaceholderNone::class => $this->_('None'),
 			PlaceholderThumbHash::class => $this->_('ThumbHash'),
 			PlaceholderBlurHash::class => $this->_('BlurHash'),
 			PlaceholderAverageColor::class => $this->_('Average Color'),
