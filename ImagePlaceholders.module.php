@@ -43,10 +43,13 @@ class ImagePlaceholders extends WireData implements Module
 		];
 
 		// On image upload, generate placeholder
-		$this->addHookAfter('FieldtypeImage::savePageField', $this, 'handleImageFieldSave');
+		$this->addHookAfter('FieldtypeImage::savePageField', $this, 'handleImageUpload');
 
 		// Add settings to image field config screen
 		$this->addHookAfter('FieldtypeImage::getConfigInputfields', $this, 'addImageFieldSettings');
+
+		// Generate palceholders for existing images on field save
+		$this->addHookAfter('FieldtypeImage::savedField', $this, 'handleImageFieldtypeSave');
 
 		// Add `Pageimage.lqip` property that returns the placeholder data uri
 		$this->addHookProperty('Pageimage::lqip', function (HookEvent $event) {
@@ -55,31 +58,35 @@ class ImagePlaceholders extends WireData implements Module
 
 		// Add `Pageimage.lqip($width, $height)` method that returns the placeholder in a given size
 		$this->addHookMethod('Pageimage::lqip', function (HookEvent $event) {
-			$width = $event->arguments(0) ?: null;
-			$height = $event->arguments(1) ?: null;
+			$width = (int) $event->arguments(0) ?: 0;
+			$height = (int) $event->arguments(1) ?: 0;
 			$event->return = $this->getPlaceholderDataUri($event->object, $width, $height);
 		});
 	}
 
-	public function handleImageFieldSave(HookEvent $event): void
+	public function handleImageUpload(HookEvent $event): void
 	{
 		$page = $event->arguments(0);
 		$field = $event->arguments(1);
 		$images = $page->get($field->name);
-		$placeholderType = $this->getPlaceholderType($field);
-
-		if (!$placeholderType || !$images->count() || $page->hasStatus(Page::statusDeleted)) {
-			return;
+		$type = $this->getPlaceholderType($field);
+		if ($type && $images->count() && !$page->hasStatus(Page::statusDeleted)) {
+			$image = $images->last(); // get the last added images (should be the last uploaded image)
+			$this->generateAndSavePlaceholder($image);
 		}
+	}
 
-		$image = $images->last(); // get the last added images (should be the last uploaded image)
+	public function generateAndSavePlaceholder(Pageimage $image, bool $force = false): bool
+	{
 		[, $placeholder] = $this->getPlaceholder($image, true);
-		if (!$placeholder) {
+		if (!$placeholder || $force) {
 			[$type, $placeholder] = $this->generatePlaceholder($image);
 			if ($placeholder) {
 				$this->setPlaceholder($image, [$type, $placeholder]);
+				return true;
 			}
 		}
+		return false;
 	}
 
 	protected function getPlaceholderType(Field $field): string
@@ -155,6 +162,32 @@ class ImagePlaceholders extends WireData implements Module
 		return PlaceholderNone::class;
 	}
 
+	protected function createPlaceholdersForField(Field $field, bool $force = false): void
+	{
+		if (!$this->getPlaceholderType($field)) return;
+
+		if ($force) {
+			$this->message(sprintf($this->_('Re-generating image placeholders in field `%s`'), $field->name));
+		} else {
+			$this->message(sprintf($this->_('Generating missing image placeholders in field `%s`'), $field->name));
+		}
+
+		$count = 0;
+		$total = 0;
+		$pages = $this->wire()->pages->findMany("{$field->name}.count>0, check_access=0");
+		foreach ($pages as $page) {
+			$images = $page->getUnformatted($field->name);
+			$total += $images->count();
+			foreach ($images as $image) {
+				if ($this->generateAndSavePlaceholder($image, $force)) {
+					$count++;
+				}
+			}
+		}
+
+		$this->message(sprintf($this->_('Generated %d placeholders of %d images in field `%s`'), $count, $total, $field->name));
+	}
+
 	protected function addImageFieldSettings(HookEvent $event)
 	{
 		$modules = $this->wire()->modules;
@@ -171,11 +204,11 @@ class ImagePlaceholders extends WireData implements Module
 		// $inputfields->insertAfter($fs, $children->first());
 		$inputfields->add($fs);
 
-		// Create field for choosing placeholder type
+		// Placeholder type
 		/** @var InputfieldRadios $f */
 		$f = $modules->get('InputfieldRadios');
 		$f->name = 'generateLqip';
-		$f->label = $this->_('Placeholders');
+		$f->label = $this->_('Placeholder type');
 		$f->description = $this->_('Choose whether this field should generate low-quality image placeholders (LQIP) on upload.');
 		$f->icon = 'toggle-on';
 		$f->optionColumns = 1;
@@ -185,5 +218,49 @@ class ImagePlaceholders extends WireData implements Module
 		}
 		$f->value = $field->generateLqip;
 		$fs->add($f);
+
+		// Generate missing placeholders for existing images
+		/** @var InputfieldCheckbox $f */
+		$f = $modules->get('InputfieldCheckbox');
+		$f->name = 'generateLqipForExisting';
+		$f->label = $this->_('Generate missing placeholders');
+		$f->description = $this->_('Placeholders are only generated when uploading new images.') . ' '
+			. $this->_('Check the box below and submit the form to batch-generate image placeholders for any existing images in this field.');
+		$f->label2 = $this->_('Generate missing placeholders for existing images');
+		$f->collapsed = true;
+		$f->showIf = 'generateLqip!=""';
+		$f->icon = 'question-circle-o';
+		$f->value = 1;
+		$f->checked = false;
+		$fs->add($f);
+
+		// Re-generate all placeholders for existing images
+		/** @var InputfieldCheckbox $f */
+		$f = $modules->get('InputfieldCheckbox');
+		$f->name = 'generateLqipForAll';
+		$f->label = $this->_('Re-generate all placeholders');
+		$f->description = $this->_('Check the box below and submit the form to re-generate all placeholders for any existing images in this field. Useful after changing the placeholder type.');
+		$f->label2 = $this->_('Re-generate all placeholders for existing images');
+		$f->collapsed = true;
+		// $f->showIf = 'generateLqipForExisting=1';
+		$f->showIf = 'generateLqip!=""';
+		$f->icon = 'refresh';
+		$f->value = 1;
+		$f->checked = false;
+		$fs->add($f);
+
+		// generateLqipForExisting
+	}
+
+	protected function handleImageFieldtypeSave(HookEvent $event)
+	{
+		/** @var FieldtypeImage $fieldtype */
+		$field = $event->arguments(0);
+
+		if ($field->generateLqipForAll) {
+			$this->createPlaceholdersForField($field, true);
+		} else if ($field->generateLqipForExisting) {
+			$this->createPlaceholdersForField($field, false);
+		}
 	}
 }

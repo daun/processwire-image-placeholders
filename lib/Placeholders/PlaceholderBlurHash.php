@@ -17,6 +17,7 @@ class PlaceholderBlurHash extends Placeholder {
 
 	public static function generatePlaceholder(Pageimage $image): string {
 		$contents = Image::readImageContents($image->filename);
+		if (!$contents) return '';
 		$pixels = static::generatePixelMatrixFromImage($contents);
 		if (!count($pixels)) return '';
 
@@ -47,7 +48,7 @@ class PlaceholderBlurHash extends Placeholder {
 		return "data:image/png;base64,{$data}";
 	}
 
-	protected static function generatePixelMatrixFromImage(string $contents): array {
+	protected static function generatePixelMatrixFromImage(?string $contents): array {
 		if (!$contents) {
 			return [];
 		}
