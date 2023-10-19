@@ -3,8 +3,38 @@
 namespace Daun;
 
 class Image {
+	static $imageTypes = [
+		'gif' => \IMAGETYPE_GIF,
+		'jpg' => \IMAGETYPE_JPEG,
+		'jpeg' => \IMAGETYPE_JPEG,
+		'png' => \IMAGETYPE_PNG
+	];
+
+	public static function getImageType(string $path) {
+		if (!file_exists($path) || !is_readable($path) || is_dir($path) || !exif_imagetype($path)) {
+			return null;
+		}
+
+		$type = null;
+		if (function_exists('exif_imagetype')) {
+			return exif_imagetype($path);
+		}
+
+		$info = @getimagesize($path);
+		if (isset($info[2])) {
+			return $info[2];
+		}
+
+		$extension = strtolower(pathinfo($path, \PATHINFO_EXTENSION));
+		if (static::$imageTypes[$extension]) {
+			return static::$imageTypes[$extension];
+		}
+
+		return null;
+	}
+
 	public static function readImageContents(string $path) {
-		if (!file_exists($path) || is_dir($path) || !exif_imagetype($path)) {
+		if (!file_exists($path) || !is_readable($path) || is_dir($path) || !exif_imagetype($path)) {
 			// $this->errors("Image file does not exist", Notice::log);
 			return null;
 		}

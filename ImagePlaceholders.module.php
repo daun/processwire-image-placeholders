@@ -1,5 +1,6 @@
 <?php namespace ProcessWire;
 
+use Daun\Image;
 use Daun\Placeholders\PlaceholderAverageColor;
 use Daun\Placeholders\PlaceholderBlurHash;
 use Daun\Placeholders\PlaceholderThumbHash;
@@ -72,7 +73,9 @@ class ImagePlaceholders extends WireData implements Module
 		$type = $this->getPlaceholderType($field);
 		if ($type && $images->count() && !$page->hasStatus(Page::statusDeleted)) {
 			$image = $images->last(); // get the last added images (should be the last uploaded image)
-			$this->generateAndSavePlaceholder($image);
+			if ($this->isSupportedImageFormat($image)) {
+				$this->generateAndSavePlaceholder($image);
+			}
 		}
 	}
 
@@ -263,5 +266,15 @@ class ImagePlaceholders extends WireData implements Module
 		} else if ($field->generateLqipForExisting) {
 			$this->createPlaceholdersForField($field, false);
 		}
+	}
+
+	protected function isSupportedImageFormat(Pageimage $image): bool
+	{
+		$format = Image::getImageType($image->filename);
+		return in_array($format, $this->supportedImageFormats());
+	}
+
+	protected function supportedImageFormats() {
+		return [\IMAGETYPE_GIF, \IMAGETYPE_JPEG, \IMAGETYPE_PNG];
 	}
 }
