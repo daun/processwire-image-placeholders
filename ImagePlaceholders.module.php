@@ -37,10 +37,8 @@ class ImagePlaceholders extends WireData implements Module
 		$this->generators = [
 			PlaceholderThumbHash::class => $this->_('ThumbHash'),
 			PlaceholderBlurHash::class => $this->_('BlurHash'),
-			PlaceholderAverageColor::class => $this->_('Average Color'),
+			PlaceholderAverageColor::class => $this->_('Average color'),
 			// PlaceholderDominantColor::class => $this->_('Dominant Color'),
-			// PlaceholderProcessWire::class => $this->_('Image variant'),
-			// PlaceholderSVG::class => $this->_('SVG'),
 		];
 
 		// Add settings to image field config screen
