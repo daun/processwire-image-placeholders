@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.0
+
+- Cache generated placeholder data uris
+
 ## 0.2.0
 
 - Allow clearing all placeholders at once
