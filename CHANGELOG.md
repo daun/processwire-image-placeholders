@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.0
+
+- Allow clearing all placeholders at once
+- Use Imagick to improve alpha channel accuracy
+
 ## 0.1.2
 
 - Check for supported file formats
