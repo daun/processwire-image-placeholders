@@ -104,6 +104,11 @@ each other. This allows smoother animations between the blurry unloaded and the 
 
 Please [open an issue](https://github.com/daun/processwire-image-placeholders/issues/new) for support.
 
+## Credits
+
+Blue Tomato's deprecated [ImageBlurhash](https://github.com/blue-tomato/ImageBlurhash) module
+inspired and set the standard for this module. (Licensed under MIT © 2020 Blue Tomato GmbH)
+
 ## License
 
 [MIT](./LICENCE)

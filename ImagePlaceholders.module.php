@@ -155,12 +155,16 @@ class ImagePlaceholders extends WireData implements Module
 		[$type, $placeholder] = $this->getPlaceholder($image, false);
 		if (!$placeholder) return '';
 
-		$handler = $this->getPlaceholderGenerator($type);
 		$width = $width ?: $this->defaultLqipWidth;
-		$height = $height ?: $width / ($image->width / $image->height);
+		$height = $height ?: floor($width / ($image->width / $image->height));
+
+		$key = $this->wire()->sanitizer->pageName("{$image->field->name}-{$type}-{$placeholder}", false, 255);
 
 		try {
-			return $handler::generateDataURI($placeholder, $width, $height);
+			return $this->wire()->cache->getFor('image-placeholders', $key, WireCache::expireMonthly, function () use ($type, $placeholder, $width, $height) {
+				$handler = $this->getPlaceholderGenerator($type);
+				return $handler::generateDataURI($placeholder, $width, $height);
+			});
 		} catch (\Throwable $e) {
 			$this->wire()->error($e->getMessage());
 			return '';
@@ -218,6 +222,8 @@ class ImagePlaceholders extends WireData implements Module
 				}
 			}
 		}
+
+		$this->wire()->cache->deleteFor('image-placeholders', "{$field->name}-*");
 
 		$this->message(sprintf($this->_('Removed %d placeholders of %d images in field `%s`'), $removed, $total, $field->name));
 	}
