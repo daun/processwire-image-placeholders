@@ -7,14 +7,15 @@ Supports [ThumbHash](https://evanw.github.io/thumbhash/) and [BlurHash](https://
 ## Why use image placeholders?
 
 Low-Quality Image Placeholders (LQIP) are used to improve the perceived performance of sites by
-displaying a small, low-quality version of an image while the high-quality version is being loaded.
-The LQIP technique is often used in combination with lazy loading.
+displaying a **small, low-quality version of an image** while the high-quality version is being loaded.
+The LQIP technique is often used in combination with progressive lazyloading.
 
 ## How it works
 
-This module will automatically generate an image placeholder for each image that is uploaded to
-fields configured to use them. In your frontend templates, you can access the image placeholder as
-a data URI string to display while the high-quality image is loading. See below for markup examples.
+This module will automatically generate a small blurry image placeholder for each image that is
+uploaded to fields configured to use them. In your frontend templates, you can access the image
+placeholder as a data URI string to display while the high-quality image is loading.
+See below for markup examples.
 
 ## Placeholder types
 
@@ -36,7 +37,7 @@ Calculates the average color of the image.
 
 ## Installation
 
-Install the module from the root of your ProcessWire installation.
+Install the module using composer from the root of your ProcessWire installation.
 
 ```sh
 composer require daun/processwire-image-placeholders
@@ -53,22 +54,46 @@ You'll need to configure your image fields to generate image placeholders.
 There, you can choose the type of placeholder to generate. If you're installing the module on an
 existing site, you can also choose to batch-generate placeholders for any existing images.
 
+![Field settings dialog](assets/field-settings.png)
+
 ## Usage
 
-Accessing an image's `lqip` property will return a data uri string of its placeholder. Using it as
-a method allows setting a custom width and/or height of the placeholder.
+Accessing an image's `lqip` property will return a data URI string of its placeholder.
 
 ```php
-$page->image->lqip;           // data:image/png;base64,R0lGODlhEAAQAMQAA
-$page->image->lqip(300);      // 300 x auto
-$page->image->lqip(300, 200); // 300 x 200px
+$page->image->lqip; // data:image/png;base64,R0lGODlhEAAQAMQAA
 ```
 
-Depending on your lazyloading technique, you can either use this as image `src` or render it as a
-separate image.
+Accessing it as a method allows setting a custom width and/or height of the placeholder.
 
 ```php
-<img src="<?= $page->image->lqip ?>" data-src="<?= $page->image->url ?>">
+$page->image->lqip(300, 200); // 300x200px
+```
+
+### Markup
+
+Using a lazyload library like [lazysizes](https://github.com/aFarkas/lazysizes) or
+[vanilla-lazyload](https://github.com/verlok/vanilla-lazyload), you can show a
+placeholder image by using its data URI as `src` of the image.
+
+```php
+<!-- Using the placeholder as src while lazyloading the image -->
+<img
+  src="<?= $page->image->lqip ?>"
+  data-src="<?= $page->image->url ?>"
+  data-lazyload
+/>
+```
+
+Another technique is rendering the placeholder and the original image as separate images on top of
+each other. This allows smoother animations between the blurry unloaded and the final loaded state.
+
+```php
+<!-- Display placeholder and image on top of each other -->
+<div class="ratio-box">
+  <img src="<?= $page->image->lqip ?>" aria-hidden="true">
+  <img data-src="<?= $page->image->url ?>" data-lazyload>
+</div>
 ```
 
 ## Support
