@@ -54,6 +54,8 @@ You'll need to configure your image fields to generate image placeholders.
 There, you can choose the type of placeholder to generate. If you're installing the module on an
 existing site, you can also choose to batch-generate placeholders for any existing images.
 
+![Field settings dialog](assets/field-settings.png)
+
 ## Usage
 
 Accessing an image's `lqip` property will return a data URI string of its placeholder.
@@ -70,7 +72,8 @@ $page->image->lqip(300, 200); // 300x200px
 
 ### Markup
 
-Using a lazyload library like [lazysizes](https://github.com/aFarkas/lazysizes), you can show a
+Using a lazyload library like [lazysizes](https://github.com/aFarkas/lazysizes) or
+[vanilla-lazyload](https://github.com/verlok/vanilla-lazyload), you can show a
 placeholder image by using its data URI as `src` of the image.
 
 ```php
