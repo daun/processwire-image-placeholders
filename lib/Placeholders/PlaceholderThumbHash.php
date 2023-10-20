@@ -38,11 +38,13 @@ class PlaceholderThumbHash extends Placeholder {
 	}
 
 	protected static function generatePixelMatrixFromImage(?string $contents): array {
-		if (!$contents) {
-			return [];
-		}
+		if (!$contents) return [];
 
-		return static::generatePixelMatrixFromImageUsingGD($contents);
+		if (Image::supportsImagick()) {
+			return static::generatePixelMatrixFromImageUsingImagick($contents);
+		} else {
+			return static::generatePixelMatrixFromImageUsingGD($contents);
+		}
 	}
 
 	protected static function generatePixelMatrixFromImageUsingGD(string $contents): array {
@@ -62,6 +64,28 @@ class PlaceholderThumbHash extends Placeholder {
 				$pixels[] = $alpha;
 			}
 		}
+
+		return [$width, $height, $pixels];
+	}
+
+	protected static function generatePixelMatrixFromImageUsingImagick(string $contents): array {
+		$image = new \Imagick();
+		$image->readImageBlob($contents);
+		[$width, $height] = Image::contain($image->getImageWidth(), $image->getImageHeight(), static::$maxThumbSize);
+		$image->resizeImage($width, $height, \Imagick::FILTER_LANCZOS, 1);
+
+		$pixels = [];
+		foreach ($image->getPixelIterator() as $row) {
+				foreach ($row as $pixel) {
+						$colors = $pixel->getColor(2);
+						$pixels[] = $colors['r'];
+						$pixels[] = $colors['g'];
+						$pixels[] = $colors['b'];
+						$pixels[] = $colors['a'];
+				}
+		}
+
+		$image->destroy();
 
 		return [$width, $height, $pixels];
 	}

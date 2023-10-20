@@ -13,7 +13,8 @@ class PlaceholderAverageColor extends Placeholder {
 		$contents = Image::readImageContents($image->filename);
 		if ($contents) {
 			try {
-				return static::readAverageImageColor($contents);
+				$rgba = static::readAverageImageColor($contents);
+				return implode('.', $rgba);
 			} catch (\Exception $e) {
 				throw new \Exception("Error encoding average color: {$e->getMessage()}");
 			}
@@ -26,22 +27,40 @@ class PlaceholderAverageColor extends Placeholder {
 			return static::$fallback;
 		}
 
-		[$r, $g, $b] = explode('.', $hash);
-		return Image::generateDataURIFromRGB($r, $g, $b);
+		$rgba = explode('.', $hash);
+		if (count($rgba) < 3) {
+			return static::$fallback;
+		}
+		[$r, $g, $b, $a] = $rgba;
+		return Image::generateDataURIFromRGBA($r, $g, $b, $a);
 	}
 
-	protected static function readAverageImageColor(?string $contents): string {
-		if (!$contents) {
-			return '';
-		}
 
-		$image = imagecreatefromstring($contents);
+	protected static function readAverageImageColor(?string $contents): array {
+		if (!$contents) return [];
+
+		if (Image::supportsImagick()) {
+			return static::readAverageImageColorUsingImagick($contents);
+		} else {
+			return static::readAverageImageColorUsingGD($contents);
+		}
+	}
+
+	protected static function readAverageImageColorUsingGD(string $contents): array {
+		$image = @imagecreatefromstring($contents);
 		$image = imagescale($image, 1, 1);
 		$rgba = imagecolorsforindex($image, imagecolorat($image, 0, 0));
 		imagedestroy($image);
+		return array_slice(array_values($rgba), 0, 4);
+	}
 
-		$channels = array_slice(array_values($rgba), 0, 4);
-
-		return implode('.', $channels);
+	protected static function readAverageImageColorUsingImagick(string $contents): array {
+		$image = new \Imagick();
+		$image->readImageBlob($contents);
+		$image->resizeImage(1, 1, \Imagick::FILTER_LANCZOS, 1);
+		$pixel = $image->getImagePixelColor(0, 0);
+		$rgba = $pixel->getColor(2);
+		$image->destroy();
+		return  array_slice(array_values($rgba), 0, 4);
 	}
 }

@@ -60,15 +60,24 @@ class Image {
 		return [$width, $height];
 	}
 
-	public static function generateDataURIFromRGB(int $r, int $g, int $b): string {
-		$image = imagecreatetruecolor(1, 1);
-		imagefill($image, 0, 0, imagecolorallocate($image, $r, $g, $b));
-
-		ob_start();
-		imagepng($image);
-		$contents = ob_get_contents();
-		ob_end_clean();
-		imagedestroy($image);
+	public static function generateDataURIFromRGBA(int $r, int $g, int $b, int $a): string {
+		if (Image::supportsImagick()) {
+			$alpha = $a / 255;
+			$imagick = new \Imagick();
+			$imagick->newImage(1, 1, new \ImagickPixel("rgba($r, $g, $b, $alpha)"));
+			$imagick->setImageFormat('png');
+			$contents = $imagick->getImageBlob();
+			$imagick->clear();
+			$imagick->destroy();
+		} else {
+			$image = imagecreatetruecolor(1, 1);
+			imagefill($image, 0, 0, imagecolorallocate($image, $r, $g, $b));
+			ob_start();
+			imagepng($image);
+			$contents = ob_get_contents();
+			ob_end_clean();
+			imagedestroy($image);
+		}
 
 		$data = base64_encode($contents);
 		return "data:image/png;base64,{$data}";
