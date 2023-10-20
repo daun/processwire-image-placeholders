@@ -79,7 +79,7 @@ Using a lazyload library like [lazysizes](https://github.com/aFarkas/lazysizes) 
 [vanilla-lazyload](https://github.com/verlok/vanilla-lazyload), you can show a
 placeholder image by using its data URI as `src` of the image.
 
-```php
+```html
 <!-- Using the placeholder as src while lazyloading the image -->
 <img
   src="<?= $page->image->lqip ?>"
@@ -91,7 +91,7 @@ placeholder image by using its data URI as `src` of the image.
 Another technique is rendering the placeholder and the original image as separate images on top of
 each other. This allows smoother animations between the blurry unloaded and the final loaded state.
 
-```php
+```html
 <!-- Display placeholder and image on top of each other -->
 <div class="ratio-box">
   <img src="<?= $page->image->lqip ?>" aria-hidden="true">
