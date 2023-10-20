@@ -1,8 +1,11 @@
 # ProcessWire Image Placeholders
 
-A ProcessWire module to generate image placeholders for smoother lazyloading.
+**A ProcessWire module to generate image placeholders for smoother lazyloading.**
 
-Supports [ThumbHash](https://evanw.github.io/thumbhash/) and [BlurHash](https://blurha.sh/) placeholders.
+Supports [ThumbHash](https://evanw.github.io/thumbhash/), [BlurHash](https://blurha.sh/), and
+average color placeholders.
+
+![Example image placeholders](assets/example-placeholder.png)
 
 ## Why use image placeholders?
 
@@ -19,12 +22,13 @@ See below for markup examples.
 
 ## Placeholder types
 
-The module supports generating various types of image placeholders. The default is `ThumbHash`.
+The module supports generating various types of image placeholders. The recommended type is
+`ThumbHash` which encodes most detail and supports transparent images.
 
 ### ThumbHash
 
-[ThumbHash](https://evanw.github.io/thumbhash/) is a newer algorith with improved color rendering
-and support for transparency.
+[ThumbHash](https://evanw.github.io/thumbhash/) is a newer image placeholder algorithm with improved
+color rendering and support for transparency.
 
 ### BlurHash
 
@@ -33,7 +37,7 @@ currently has no support for alpha channels and will render transparency in blac
 
 ### Average color
 
-Calculates the average color of the image.
+Calculates the average color of the image. Doesn't support transparency.
 
 ## Installation
 
@@ -76,7 +80,7 @@ Using a lazyload library like [lazysizes](https://github.com/aFarkas/lazysizes) 
 [vanilla-lazyload](https://github.com/verlok/vanilla-lazyload), you can show a
 placeholder image by using its data URI as `src` of the image.
 
-```php
+```html
 <!-- Using the placeholder as src while lazyloading the image -->
 <img
   src="<?= $page->image->lqip ?>"
@@ -88,7 +92,7 @@ placeholder image by using its data URI as `src` of the image.
 Another technique is rendering the placeholder and the original image as separate images on top of
 each other. This allows smoother animations between the blurry unloaded and the final loaded state.
 
-```php
+```html
 <!-- Display placeholder and image on top of each other -->
 <div class="ratio-box">
   <img src="<?= $page->image->lqip ?>" aria-hidden="true">

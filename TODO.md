@@ -1,4 +1,5 @@
 # Todo
 
 - Blurhash module compatibility if previously installed
-- Add examples and screenshots to readme
+- ProcessWire image variation placeholder
+- Remove all placeholders on uninstall
