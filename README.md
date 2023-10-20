@@ -1,8 +1,11 @@
 # ProcessWire Image Placeholders
 
-A ProcessWire module to generate image placeholders for smoother lazyloading.
+**A ProcessWire module to generate image placeholders for smoother lazyloading.**
 
-Supports [ThumbHash](https://evanw.github.io/thumbhash/) and [BlurHash](https://blurha.sh/) placeholders.
+Supports [ThumbHash](https://evanw.github.io/thumbhash/), [BlurHash](https://blurha.sh/), and
+average color placeholders.
+
+![Example image placeholders](assets/example-placeholder.png)
 
 ## Why use image placeholders?
 
