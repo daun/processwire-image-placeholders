@@ -15,7 +15,6 @@ class Image {
 			return null;
 		}
 
-		$type = null;
 		if (function_exists('exif_imagetype')) {
 			return exif_imagetype($path);
 		}
