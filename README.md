@@ -22,12 +22,13 @@ See below for markup examples.
 
 ## Placeholder types
 
-The module supports generating various types of image placeholders. The default is `ThumbHash`.
+The module supports generating various types of image placeholders. The recommended type is
+`ThumbHash` which encodes most detail and supports transparent images.
 
 ### ThumbHash
 
-[ThumbHash](https://evanw.github.io/thumbhash/) is a newer algorith with improved color rendering
-and support for transparency.
+[ThumbHash](https://evanw.github.io/thumbhash/) is a newer image placeholder algorithm with improved
+color rendering and support for transparency.
 
 ### BlurHash
 
@@ -36,7 +37,7 @@ currently has no support for alpha channels and will render transparency in blac
 
 ### Average color
 
-Calculates the average color of the image.
+Calculates the average color of the image. Doesn't support transparency.
 
 ## Installation
 
