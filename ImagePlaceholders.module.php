@@ -67,6 +67,9 @@ class ImagePlaceholders extends WireData implements Module
 	{
 		$page = $event->arguments(0);
 		$field = $event->arguments(1);
+
+		if ($field->_clearing_placeholders_) return;
+
 		$images = $page->get($field->name);
 		$type = $this->getPlaceholderType($field);
 		if ($type && $images->count() && !$page->hasStatus(Page::statusDeleted)) {
@@ -204,6 +207,7 @@ class ImagePlaceholders extends WireData implements Module
 	{
 		$total = 0;
 		$removed = 0;
+		$field->_clearing_placeholders_ = true;
 		$pages = $this->wire()->pages->findMany("{$field->name}.count>0, check_access=0");
 		foreach ($pages as $page) {
 			$images = $page->getUnformatted($field->name);
