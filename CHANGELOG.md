@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.1
+
+- Fix error when cloning page
+- Ensure correct otuput formatting on save
+
 ## 0.3.0
 
 - Cache generated placeholder data uris
