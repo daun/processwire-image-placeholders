@@ -100,7 +100,10 @@ class ImagePlaceholders extends WireData implements Module
 		$image->filedata("image-placeholder-type", $type);
 		$image->filedata("image-placeholder-data", $data);
 		$image->filedata("image-placeholder-created", time());
+
+		$of = $image->page->of(false);
 		$image->page->save($image->field->name, ["quiet" => true, "noHooks" => true]);
+		$image->page->of($of);
 	}
 
 	protected function clearPlaceholder(Pageimage $image): bool
@@ -110,7 +113,11 @@ class ImagePlaceholders extends WireData implements Module
 		$image->filedata(false, "image-placeholder-data");
 		$image->filedata(false, "image-placeholder-created");
 		$after = $image->filedata("image-placeholder-data");
+
+		$of = $image->page->of(false);
 		$image->page->save($image->field->name, ["quiet" => true, "noHooks" => true]);
+		$image->page->of($of);
+
 		return $before !== $after;
 	}
 
