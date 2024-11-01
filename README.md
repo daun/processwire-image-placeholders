@@ -37,7 +37,7 @@ currently has no support for alpha channels and will render transparency in blac
 
 ### Average color
 
-Calculates the average color of the image. Doesn't support transparency.
+Calculates the average color of the image.
 
 ## Installation
 

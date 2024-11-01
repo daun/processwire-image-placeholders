@@ -53,7 +53,7 @@ class ImagePlaceholders extends WireData implements Module
 
 		$images = $page->get($field->name);
 		$type = $this->getPlaceholderType($field);
-		if ($type && $images->count() && !$page->hasStatus(Page::statusDeleted)) {
+		if ($type && $images->count() && !$page->hasStatus(Page::statusDeleted) && !$page->isNew()) {
 			$image = $images->last(); // get the last added images (should be the last uploaded image)
 			if ($this->isSupportedImageFormat($image)) {
 				$this->generateAndSavePlaceholder($image);
