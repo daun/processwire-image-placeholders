@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.0
+
+- Add option to globally disable placeholder generation (@SkyLundy)
+
 ## 0.3.1
 
 - Fix error when cloning page
