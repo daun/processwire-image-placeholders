@@ -8,8 +8,8 @@ $info = [
 	'author' => 'Philipp Daun',
 	'icon' => 'picture-o',
 	'requires' => [
-		'PHP>=7.0',
-		'ProcessWire>=3.0.155',
+		'PHP>=8.2',
+		'ProcessWire>=3.0.248',
 		'FieldtypeImage'
 	],
 	'singular' => true,
