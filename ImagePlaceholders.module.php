@@ -204,7 +204,7 @@ class ImagePlaceholders extends WireData implements Module, ConfigurableModule
 			$images = $page->getUnformatted($field->name);
 			foreach ($images as $image) {
 				$total++;
-				if ($this->clearPlaceholder($image, $force)) {
+				if ($this->clearPlaceholder($image)) {
 					$removed++;
 				}
 			}
