@@ -24,8 +24,8 @@
         "php": ">=8.2",
         "ext-exif": "*",
         "ext-gd": "*",
-        "composer/installers": "^2.0",
-        "kornrunner/blurhash": "~1.2.1",
+        "composer/installers": "^1.0",
+        "kornrunner/blurhash": "^1.2",
         "srwiez/thumbhash": "^1.2"
     },
     "require-dev": {
