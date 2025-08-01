@@ -8,7 +8,7 @@ use Daun\Placeholders\PlaceholderThumbHash;
 // Register the private namespace used by this module
 wire('classLoader')->addNamespace('Daun', __DIR__ . '/lib');
 
-class ImagePlaceholders extends WireData implements Module
+class ImagePlaceholders extends WireData implements Module, ConfigurableModule
 {
 	protected int $defaultLqipWidth = 20;
 	protected array $generators = [];
@@ -22,14 +22,16 @@ class ImagePlaceholders extends WireData implements Module
 			// PlaceholderDominantColor::class => $this->_('Dominant Color'),
 		];
 
-		// Add settings to image field config screen
-		$this->addHookAfter('FieldtypeImage::getConfigInputfields', $this, 'addImageFieldSettings');
+		if (!$this->placeholder_generation_disabled) {
+			// Add settings to image field config screen
+			$this->addHookAfter('FieldtypeImage::getConfigInputfields', $this, 'addImageFieldSettings');
 
-		// Generate placeholders for existing images on field save
-		$this->addHookAfter('FieldtypeImage::savedField', $this, 'handleImageFieldtypeSave');
+			// Generate placeholders for existing images on field save
+			$this->addHookAfter('FieldtypeImage::savedField', $this, 'handleImageFieldtypeSave');
 
-		// Generate placeholder on image upload
-		$this->addHookAfter('FieldtypeImage::savePageField', $this, 'handleImageUpload');
+			// Generate placeholder on image upload
+			$this->addHookAfter('FieldtypeImage::savePageField', $this, 'handleImageUpload');
+		}
 
 		// Add `$image->lqip` property that returns the placeholder data uri
 		$this->addHookProperty('Pageimage::lqip', function (HookEvent $event) {
@@ -150,6 +152,10 @@ class ImagePlaceholders extends WireData implements Module
 
 		try {
 			return $this->wire()->cache->getFor('image-placeholders', $key, WireCache::expireMonthly, function () use ($type, $placeholder, $width, $height) {
+				if ($this->placeholder_generation_disabled) {
+					return '';
+				}
+
 				$handler = $this->getPlaceholderGenerator($type);
 				return $handler::generateDataURI($placeholder, $width, $height);
 			});
