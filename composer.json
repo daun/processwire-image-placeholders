@@ -1,13 +1,17 @@
 {
     "name": "daun/processwire-image-placeholders",
-    "type": "processwire-module",
-    "extra": {
-        "installer-name": "ImagePlaceholders"
-    },
     "description": "A ProcessWire module to generate low-quality image placeholders (LQIP) for smoother lazyloading",
-    "keywords": [ "processwire", "image", "placeholder", "lqip", "thumbhash", "blurhash", "lazyload" ],
-    "homepage": "https://github.com/daun/processwire-image-placeholders",
     "license": "MIT",
+    "type": "processwire-module",
+    "keywords": [
+        "processwire",
+        "image",
+        "placeholder",
+        "lqip",
+        "thumbhash",
+        "blurhash",
+        "lazyload"
+    ],
     "authors": [
         {
             "name": "Philipp Daun",
@@ -15,20 +19,24 @@
             "homepage": "https://philippdaun.net"
         }
     ],
+    "homepage": "https://github.com/daun/processwire-image-placeholders",
     "require": {
         "php": ">=8.2",
-        "ext-gd": "*",
         "ext-exif": "*",
-        "composer/installers": "~2.0",
+        "ext-gd": "*",
+        "composer/installers": "^2.0",
         "kornrunner/blurhash": "~1.2.1",
         "srwiez/thumbhash": "^1.2"
+    },
+    "require-dev": {
+        "rector/rector": "^2.1"
     },
     "config": {
         "allow-plugins": {
             "composer/installers": true
         }
     },
-    "require-dev": {
-        "rector/rector": "^2.1"
+    "extra": {
+        "installer-name": "ImagePlaceholders"
     }
 }
