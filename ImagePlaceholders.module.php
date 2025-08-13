@@ -133,7 +133,7 @@ class ImagePlaceholders extends WireData implements Module, ConfigurableModule
 		return [null, null];
 	}
 
-	protected function getPlaceholderDataUri(Pageimage $image, int $width = 0, int $height = 0): string
+	protected function ___getPlaceholderDataUri(Pageimage $image, int $width = 0, int $height = 0): string
 	{
 		[$type, $placeholder] = $this->getPlaceholder($image, false);
 		if (!$placeholder) return '';
