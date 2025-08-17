@@ -100,6 +100,20 @@ each other. This allows smoother animations between the blurry unloaded and the 
 </div>
 ```
 
+## Hooks
+
+You can hook into the placeholder generation process to modify the generated placeholder data URIs.
+The example below will prevent placeholder output for possibly transparent image types.
+
+```php
+wire()->addHookAfter('ImagePlaceholders::getPlaceholderDataUri', function (HookEvent $e) {
+  $image = $e->arguments('image');
+  if ($image->ext === 'png' || $image->ext === 'gif') {
+    $e->return = '';
+  }
+});
+```
+
 ## Support
 
 Please [open an issue](https://github.com/daun/processwire-image-placeholders/issues/new) for support.
