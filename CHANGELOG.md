@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.0
+
+- Make placeholder method hookable (@SkyLundy)
+
 ## 0.4.0
 
 - Add option to globally disable placeholder generation (@SkyLundy)
